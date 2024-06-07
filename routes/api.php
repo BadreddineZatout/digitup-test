@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\TaskOwnerMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthController::class)->group(function () {
@@ -14,9 +16,9 @@ Route::controller(TaskController::class)
     ->prefix('tasks')
     ->group(function () {
         Route::get('/', 'index')->name('tasks.index');
-        Route::get('/deleted', 'getDeleted')->name('tasks.deleted');
-        Route::get('/{task}', 'show')->name('tasks.show');
+        Route::get('/deleted', 'getDeleted')->middleware(AdminMiddleware::class)->name('tasks.deleted');
+        Route::get('/{task}', 'show')->middleware(TaskOwnerMiddleware::class)->name('tasks.show');
         Route::post('/', 'store')->name('tasks.store');
-        Route::put('/{task}', 'update')->name('tasks.update');
-        Route::delete('/{task}', 'destroy')->name('tasks.destroy');
+        Route::put('/{task}', 'update')->middleware(TaskOwnerMiddleware::class)->name('tasks.update');
+        Route::delete('/{task}', 'destroy')->middleware(TaskOwnerMiddleware::class)->name('tasks.destroy');
     });
