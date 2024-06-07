@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
-use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -12,23 +13,27 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        if (auth()->user()->isAdmin()) {
+            return Task::all();
+        }
+
+        return Task::where('user_id', auth()->id())->get();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the deleted tasks.
      */
-    public function create()
+    public function getDeleted()
     {
-        //
+        return Task::onlyTrashed()->get();
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        //
+        return Task::create([...$request->validated(), 'user_id' => auth()->id()]);
     }
 
     /**
@@ -36,23 +41,17 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Task $task)
-    {
-        //
+        return $task;
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task)
     {
-        //
+        $task->update($request->validated());
+
+        return $task;
     }
 
     /**
@@ -60,6 +59,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $task->delete();
+
+        return response()->json([
+            'message' => 'Task deleted successfully',
+        ], 200);
     }
 }

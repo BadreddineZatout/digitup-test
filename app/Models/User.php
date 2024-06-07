@@ -35,6 +35,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $casts = [
+        'created_at' => 'date:Y-m-d',
+        'updated_at' => 'date:Y-m-d',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -51,5 +56,10 @@ class User extends Authenticatable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }
